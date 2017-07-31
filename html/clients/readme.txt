@@ -1,5 +1,5 @@
 
-save amend_hosts.cmd, amend_registry.cmd and amend_rdp.cmd to c:\program files\openssh\bin
+save amend_hosts.cmd, amend_registry.cmd, amend_rdp.cmd and rdptemplate.txt to c:\program files\openssh\bin
 
 Run openssh...exe and accept defaults.
 
