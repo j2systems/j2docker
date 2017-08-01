@@ -21,7 +21,7 @@ then
 
 	INTEGRATE=false
 	DETAIL=$(cat tmp/run)
-	echo $DETAIL
+	#echo $DETAIL
 	IMAGENAME=$(echo $DETAIL|cut -d "&" -f1|cut -d "=" -f1|sed "s,_FSLASH_,/,g"|sed "s,_COLON_,:,g")
        	HOST=$(echo $DETAIL|cut -d "&" -f1|cut -d "=" -f2)
 	CUSTOMCOMMAND=$(echo $DETAIL|cut -d "&" -f2|cut -d "=" -f2|sed "s,+, ,g"|sed "s,%22,\\\",g"|sed "s,%3D,=,g"|sed "s,%26,\&,g"|sed "s,%27,\',g"|sed "s,%2B,+,g"|sed "s,%2F,/,g"|sed "s,%40,\@,g")
