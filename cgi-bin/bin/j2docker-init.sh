@@ -25,4 +25,6 @@ then
 	write_global J2USER
 	write_global J2PASS
 fi
+cd /var/www
+git pull j2docker master
 
