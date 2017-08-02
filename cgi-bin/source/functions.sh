@@ -91,7 +91,8 @@ get_container_ip(){
 
 configure_routing(){
 	DOCKERSUBNET=$(docker network inspect j2docker|grep Subnet|cut -d ":" -f2|cut -d "/" -f1|tr -d " \"")
-	HOSTIP=$(ifconfig ens33|grep "inet "|tr -s " "|cut -d " " -f3)
+	HOSTNIC=$(netstat -r|grep default|tr -s " "|cut -d " " -f8)
+	HOSTIP=$(ifconfig ${HOSTNIC}|grep "inet "|tr -s " "|cut -d " " -f3)
 	if [[ "$3" == "WINDOWS" ]]
 	then
 		if [[ $(ssh $1@$2 route print|grep -c $DOCKERSUBNET) -eq 0 ]]
