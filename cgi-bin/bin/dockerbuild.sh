@@ -30,7 +30,7 @@ cd $BASEDIR
 	docker run -itd --name $BUILDNAME  --network j2docker -v $SCRIPTSDIR:/mnt/host j2systems/docker:centos6HS /bin/sh 2>&1
 	SUBDIR=$(echo $BUILDPATH|sed "s,$SCRIPTSDIR/,,g")
 	docker exec $BUILDNAME mkdir /tmp/build 
-	docker exec cp /mnt/host/$SUBDIR/cache.key $BUILDNAME:/tmp/cache.key
+	docker cp $BUILDPATH/cache.key $BUILDNAME:/tmp/cache.key
 	docker exec $BUILDNAME /bin/tar zxf /mnt/host/$SUBDIR/$BUILDFILE -C /tmp/build 2>&1
 	CACHEDIR="/hs/InterSystems"
 	echo "Copying over runtimes"
