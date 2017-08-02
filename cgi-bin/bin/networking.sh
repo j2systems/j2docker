@@ -7,7 +7,14 @@ unset OLDJ2DOCKERSN
 DOCKNET=j2docker
 HOST=j2-iscinternal
 ID=j2
-HOSTIP=$(ifconfig ens33|grep "inet "|tr -s " "|cut -d " " -f3)
+HOSTNIC=$(netstat -r|grep default|tr -s " "|cut -d " " -f8)
+HOSTIP=$(ifconfig ${HOSTNIC}|grep "inet "|tr -s " "|cut -d " " -f3)
+while [[ "$HOSTIP" == "" ]]
+do 
+	HOSTIP=$(ifconfig ${HOSTNIC}|grep "inet "|tr -s " "|cut -d " " -f3)
+	sleep 1
+done
+
 write_global HOSTIP
 HOSTOCT=$(echo $HOSTIP|cut -d "." -f4)
 write_global HOSTOCT
