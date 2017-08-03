@@ -43,10 +43,25 @@ echo "<tr><td class=\"information\" colspan=\"5\">ZFS Status</td></tr>"
 #echo "<tr class=\"information blue\"><td>HOST</td><td>USERNAME</td><td>OS</td><td>INTEGRATED</td><td>STUDIO</td><td>ATELIER</td></tr>"
 while read NAME USED AVAIL REFER MOUNT
 do
-echo "<tr class=\"filelisting $THISCOLOR\">"
-echo "<td>$NAME</td><td>$USED</td><td>$AVAIL</td><td>$REFER</td><td>$MOUNT</td>"
-echo "</tr>"
-[[ "$THISCOLOR" == "blue" ]] && THISCOLOR=light
+	echo "<tr class=\"filelisting $THISCOLOR\">"
+	unset CROSSREF
+	CROSSREF=$(grep "$NAME " tmp/dockervols|cut -d " " -f2)
+	if [[ "$CROSSREF" != "" ]] 
+	then
+		NAME=$CROSSREF
+	else
+		if [[ $(echo $NAME|grep -c "\-init") -ne 0 ]] 
+		then
+			unset THISREF
+			THISREF=$(echo $NAME|cut -d "-" -f1)
+			CROSSREF=$(grep "$THISREF" tmp/dockervols|cut -d " " -f2)
+			[[ "$CROSSREF" != "" ]] && NAME="(${CROSSREF} root)"
+		fi 
+	fi
+
+	echo "<td>$NAME</td><td>$USED</td><td>$AVAIL</td><td>$REFER</td><td>$MOUNT</td>"
+	echo "</tr>"
+	[[ "$THISCOLOR" == "blue" ]] && THISCOLOR=light
 done < tmp/zfsstats
 echo "</table>"
 echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"build\"></td></tr></table>"
