@@ -104,7 +104,12 @@ function createIframe(url,id,container)
 	newTD.setAttribute("id",id + container);
 	newTD.setAttribute("class", 'test');
 	newTD.appendChild(newIframe);
-	document.getElementById(container).appendChild(newTD);
+	if (id.substring(0, 4) == "ccon") {
+		document.getElementById(container).appendChild(newTD);
+	}else {
+		var ThisRef = document.getElementById(container);
+		ThisRef.insertBefore(newTD, ThisRef.childNodes[0]);
+	}
 }
 
 function importcacheroutine(thiscontainer)
