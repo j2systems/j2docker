@@ -43,7 +43,7 @@ case "${REQUEST_METHOD}" in
 			echo "<td class=\"filelisting yellow\">$VALUE</td></tr>"
 			echo "<td class=\"button black\">Name:</td>"
 			echo "<form action=\"./terminal.cgi\" method=\"POST\">"
-			echo "<td class=\"filelisting yellow\"><input type=\"text\" name=\"NEWCONTAINER\" class=\"textbox yellow\"></td></tr></table>"
+			echo "<td class=\"filelisting yellow\"><input type=\"text\" name=\"NEWCONTAINER\" class=\"textbox yellow\" value=\"$(echo $VALUE|cut -d "-" -f2)\"></td></tr></table>"
 			echo "<table align=\"center\">"
 			echo "<input type=\"hidden\" name=\"path\" value=\"$SUBMITTEDPATH\">"
 			echo "<input type=\"hidden\" name=\"file\" value=\"$VALUE\">"

@@ -44,6 +44,8 @@ cd $BASEDIR
 	echo "Stopping instance, removing install and commiting"
 	docker stop $BUILDNAME 2>&1 1> /dev/null
 	docker commit --change='ENTRYPOINT ["/sbin/pseudo-init"]' $BUILDNAME j2systems/docker:HS${BUILDNAME} 2>&1
+	echo "Removing intermediary container"
+	docker rm $BUILDNAME
 	echo "Process complete"
 	echo "SCRIPT END"
 	# Stop instance
