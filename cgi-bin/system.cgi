@@ -39,7 +39,7 @@ echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"build\
 echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"yellow build\"></td></tr></table>"
 THISCOLOR=blue
 echo "<table align=\"center\">"
-echo "<tr><td class=\"information\" colspan=\"5\">ZFS Status</td></tr>"
+echo "<tr><td class=\"information\" colspan=\"5\">ZFS Usage</td></tr>"
 #echo "<tr class=\"information blue\"><td>HOST</td><td>USERNAME</td><td>OS</td><td>INTEGRATED</td><td>STUDIO</td><td>ATELIER</td></tr>"
 while read NAME USED AVAIL REFER MOUNT
 do

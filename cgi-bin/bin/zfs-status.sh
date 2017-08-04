@@ -20,7 +20,8 @@ docker inspect --format='{{json .GraphDriver.Data.Dataset}} {{.Name}}' $(docker 
 while read NAME USED AVAIL REFER MOUNT
 do
         unset CROSSREF
-        CROSSREF=$(grep "$NAME " tmp/dockervols|cut -d " " -f2)
+	unset STATUS
+        CROSSREF=$(grep "$NAME " $OUTPUTDIR/dockervols|cut -d " " -f2)
         if [[ "$CROSSREF" != "" ]]
         then
                 NAME=$CROSSREF
@@ -29,16 +30,13 @@ do
                 then
                         unset THISREF
                         THISREF=$(echo $NAME|cut -d "-" -f1)
-                        CROSSREF=$(grep "$THISREF" tmp/dockervols|cut -d " " -f2)
+                        CROSSREF=$(grep "$THISREF" $OUTPUTDIR/dockervols|cut -d " " -f2)
                         [[ "$CROSSREF" != "" ]] && NAME="(${CROSSREF}-root)"
                 fi
         fi
 	if [[ "$CROSSREF" == "" && $(echo $NAME|grep -c "rpool/ROOT/") -ne 0 ]] 
 	then
-		zfs destroy $NAME
-		[[ $? -ne 0 ]] && echo "$NAME $USED $AVAIL $REFER $MOUNT" >> $OUTPUTDIR/zfsusage
-	else
-		echo "$NAME $USED $AVAIL $REFER $MOUNT" >> $OUTPUTDIR/zfsusage
+		echo "dockervol $AVAIL $REFER $MOUNT" >> $OUTPUTDIR/zfsusage
         fi
 done < $OUTPUTDIR/zfsstats
 
