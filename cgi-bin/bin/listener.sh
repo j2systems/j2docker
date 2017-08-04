@@ -4,7 +4,6 @@ ROOTPATH=/var/www/cgi-bin
 TRIGGER=$ROOTPATH/tmp/nag
 JOBTRIGGER=$ROOTPATH/tmp/trigger
 SCRIPTPATH=$ROOTPATH/bin
-. $ROOTPATH/bin/j2docker-init.sh
 while :
 do
 	unset COMMAND
