@@ -37,17 +37,22 @@ echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"build\
 
 #ZFS usage
 echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"yellow build\"></td></tr></table>"
-THISCOLOR=blue
 echo "<table align=\"center\">"
 echo "<tr><td class=\"information\" colspan=\"5\">ZFS Usage</td></tr>"
-#echo "<tr class=\"information blue\"><td>HOST</td><td>USERNAME</td><td>OS</td><td>INTEGRATED</td><td>STUDIO</td><td>ATELIER</td></tr>"
-while read NAME USED AVAIL REFER MOUNT
+echo "<tr class=\"filelisting blue\"><td>Volume</td><td>Size (bytes)</td>"
+REFERENCED=0
+while read NAME USED
 do
-	echo "<tr class=\"filelisting $THISCOLOR\">"
-	echo "<td>$NAME</td><td>$USED</td>"
-	echo "</tr>"
-	[[ "$THISCOLOR" == "blue" ]] && THISCOLOR=light
+	if [[ "$NAME" == "(Reference-volume)" ]]
+	then 
+		REFERENCED=$(($REFERENCED + USED))
+	else
+		echo "<tr class=\"filelisting light\">"
+		echo "<td>$NAME</td><td>$USED</td>"
+		echo "</tr>"
+	fi
 done < tmp/zfsusage
+echo "<tr class=\"filelisting light\"><td>(Reference volumes)</td><td>${REFERENCED}</td>"
 echo "</table>"
 echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"build\"></td></tr></table>"
 

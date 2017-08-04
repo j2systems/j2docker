@@ -12,12 +12,12 @@ do
 	touch $OUTPUTDIR/$ZFSOUT && chown :apache $OUTPUTDIR/$ZFSOUT
 done
 
-zfs list > $OUTPUTDIR/zfsstats
+zfs get -o name,value -Hp used > $OUTPUTDIR/zfsstats
 zpool list > $OUTPUTDIR/zfspools
 docker inspect --format='{{json .GraphDriver.Data.Dataset}} {{.RepoTags}}' $(docker images -qa)|tr -d "\"[]" > $OUTPUTDIR/dockervols
 docker inspect --format='{{json .GraphDriver.Data.Dataset}} {{.Name}}' $(docker ps -qa)|tr -d "\"[]"|sed "s, /, ,g" >> $OUTPUTDIR/dockervols
 
-while read NAME USED AVAIL REFER MOUNT
+while read NAME USED
 do
         unset CROSSREF
 	unset STATUS
@@ -25,18 +25,29 @@ do
         if [[ "$CROSSREF" != "" ]]
         then
                 NAME=$CROSSREF
+		echo "$NAME $USED" >> $OUTPUTDIR/zfsusage
         else
-                if [[ $(echo $NAME|grep -c "\-init") -ne 0 ]]
+                if [[ $(echo $NAME|grep -c "@") -eq 0 ]]
                 then
+			if [[ $(echo $NAME|grep -c "-") -eq 1 ]]
+			then
+				THISREF=$(echo $NAME|cut -d "-" -f1)
+				CROSSREF=$(grep "$THISREF" $OUTPUTDIR/dockervols|cut -d " " -f2)
+				echo "$CROSSREF-base $USED" >> $OUTPUTDIR/zfsusage
+			else
+			 	[[ $(echo $NAME|grep -c "rpool/ROOT/") -ne 0 ]] && echo "(Reference-volume) $USED" >> $OUTPUTDIR/zfsusage
+			fi
                         unset THISREF
-                        THISREF=$(echo $NAME|cut -d "-" -f1)
-                        CROSSREF=$(grep "$THISREF" $OUTPUTDIR/dockervols|cut -d " " -f2)
-                        [[ "$CROSSREF" != "" ]] && NAME="(${CROSSREF}-root)"
+                        #THISREF=$(echo $NAME|cut -d "@" -f1)
+                        #CROSSREF=$(grep "$THISREF" $OUTPUTDIR/dockervols|cut -d " " -f2)
+                        #[[ "$CROSSREF" != "" ]] && NAME="(${CROSSREF}-base)"
+			
+		#else
+			#[[ $(echo $NAME|grep -c "rpool/ROOT/") -ne 0 ]] && NAME="Other"
                 fi
+		
         fi
-	if [[ "$CROSSREF" == "" && $(echo $NAME|grep -c "rpool/ROOT/") -ne 0 ]] 
-	then
-		echo "dockervol $AVAIL $REFER $MOUNT" >> $OUTPUTDIR/zfsusage
-        fi
+
+
 done < $OUTPUTDIR/zfsstats
 
