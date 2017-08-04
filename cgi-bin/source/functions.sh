@@ -329,7 +329,12 @@ dockerlogin() {
 	. /var/www/cgi-bin/tmp/globals
 	docker login -u $J2USER -p $J2PASS
 }
-dockerlogount() {
-	docker logout
+dockerlogout() {
+	docker logout > /dev/null
+}
+
+imagelocation() {
+	#$1=full image name, eg j2systems/docker:test
+	echo $(grep "$(echo $1|tr ":" " ")" /var/www/cgi-bin/tmp/images|cut -d " " -f3)
 }
 

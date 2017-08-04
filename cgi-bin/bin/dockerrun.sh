@@ -41,6 +41,12 @@ then
 				else
 					#add new hostname to global 
 					append_global NEWCONTAINERS $HOST
+					if [[ "$(imagelocation $IMAGENAME)" == "REMOTE" ]]
+					then
+						echo "Pulling image from repository"
+						docker pull $IMAGENAME
+						. $ROOTDIR/bin/image_array.sh
+					fi
 					echo "Spinning up $HOST"
 					. tmp/globals
 					echo "Entrypoint: $(docker inspect --format='{{json .Config.Entrypoint}}' $IMAGENAME|tr -d "[]")"
