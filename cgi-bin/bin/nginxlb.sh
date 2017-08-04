@@ -50,6 +50,8 @@ done < $THISPATH/tmp/nginxlb
 
 chmod 777 ${THISPATH}/tmp/j2nginxlb.conf
 docker cp ${THISPATH}/tmp/j2nginxlb.conf nginx:/etc/nginx/conf.d/j2nginxlb.conf
+docker exec -t nginx sh -c "service nginx stop"
+docker exec -t nginx nginx &
 docker exec -t nginx sh -c "service nginx reload"
 . ${THISPATH}/bin/update-clients.sh
 
