@@ -4,17 +4,15 @@
 #
 source /var/www/cgi-bin/source/functions.sh
 unset PORTS
-. /var/www/cgi-bin/tmp/globals
-if [[ "$DEFAULTPORTS" == "" ]]
-then
-        for THISPORT in 22 23 80 1972 3389 4201 4202 8080 57772
-        do
-                append_global DEFAULTPORTS $THISPORT
-        done
-	. /var/www/cgi-bin/tmp/globals
-fi
 
+#Make sure all default ports always present 
+for THISPORT in 22 23 25 80 1972 3389 4201 4202 8080 57772
+do
+	append_global DEFAULTPORTS $THISPORT
+done
 unset THISPORT
+. /var/www/cgi-bin/tmp/globals
+# PORTS is operational global.  Create it if absent.
 if [[ "$PORTS" == "" ]]
 then
 	. /var/www/cgi-bin/tmp/globals
@@ -22,8 +20,10 @@ then
         do
                 append_global PORTS $THISPORT
         done
-	. /var/www/cgi-bin/tmp/globals
 fi
+
+# Read current PORTS and add to public and DOCKER firewall rules if required.
+. /var/www/cgi-bin/tmp/globals
 
 for CHAIN in IN_public_allow DOCKER
 do
@@ -35,6 +35,8 @@ do
 		fi
 	done
 done
+
+# Iterate firewall rules and remove any unused ports
 
 for PORT in $(iptables -n -L DOCKER|grep "dpt:"|cut -d":" -f2)
 do 
