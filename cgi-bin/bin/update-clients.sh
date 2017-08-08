@@ -23,13 +23,26 @@ done < $SCRIPTBASE/tmp/containers
 if [[ "$SOMETHINGTODO" == "true" ]]
 then
 	. $SCRIPTBASE/tmp/globals
-	while read HOST USERNAME TYPE INTEGRATE STUDIO ATELIER
+	delete_global MCS
+	while  read HOST USERNAME TYPE INTEGRATE STUDIO ATELIER
 	do
+		append_global MCS $HOST
+	done < $SCRIPTBASE/tmp/management_clients
+	. $SCRIPTBASE/tmp/globals
+	for HOST in $(echo $MCS)
+	do
+		INTEGRATE=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f4)
+		USERNAME=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f2)
+		TYPE=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f3)
+		STUDIO=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f5)
+		ATELIER=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f6)
+		echo $HOST
 		if [[ "$INTEGRATE" == "true" ]]
 		then
 			if [[ "$(client_status $HOST)" == "online" ]]
 			then
 				configure_routing $USERNAME $HOST $TYPE
+	
 				case $TYPE in
 
 					"WINDOWS")
@@ -47,7 +60,7 @@ then
 							[[ "$(isRDP $THISCONTAINER)" == "true" ]] && add_rdp $USERNAME $HOST $THISCONTAINER
 						done
 						hosts_add_nginx $TYPE
-						cat $SCRIPTBASE/tmp/windowshost|ssh $USERNAME@$HOST "cmd -c copy con"
+						cat $SCRIPTBASE/tmp/windowshost|ssh $USERNAME@$HOST "cmd -c copy con" > /dev/null
 						rm -rf $SCRIPTBASE/tmp/windowshost
 						;;
 
@@ -67,7 +80,7 @@ then
 				esac
 			fi
 		fi
-	done < $SCRIPTBASE/tmp/management_clients
+	done
 else
 	#nothing is up so puge hosts
 	while read HOST USERNAME TYPE INTEGRATE STUDIO ATELIER
@@ -76,6 +89,8 @@ else
 		then
 			if [[ "$(client_status $HOST)" == "online" ]]
 			then
+
+
 				case $TYPE in
 
 					"WINDOWS")
@@ -84,7 +99,7 @@ else
 						purge_hosts $USERNAME $HOST
 						#purge registry/atelier
 						[[ "$STUDIO" == "true" ]] && purge_registry $USERNAME $HOST  && purge_rdp $USERNAME $HOST
-						cat $SCRIPTBASE/tmp/windowshost|ssh $USERNAME@$HOST "cmd -c copy con"
+						$(cat $SCRIPTBASE/tmp/windowshost|ssh $USERNAME@$HOST "cmd -c copy con") > /dev/null
 						;;
 
 					"LINUX")
