@@ -22,7 +22,7 @@ done < $SCRIPTBASE/tmp/containers
 
 if [[ "$SOMETHINGTODO" == "true" ]]
 then
-	. $SCRIPTBASE/tmp/globals
+
 	delete_global MCS
 	while  read HOST USERNAME TYPE INTEGRATE STUDIO ATELIER
 	do
@@ -36,7 +36,6 @@ then
 		TYPE=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f3)
 		STUDIO=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f5)
 		ATELIER=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f6)
-		echo $HOST
 		if [[ "$INTEGRATE" == "true" ]]
 		then
 			if [[ "$(client_status $HOST)" == "online" ]]
