@@ -18,4 +18,5 @@ cd $BASEDIR
 	delete_global TERMTARGET
 	delete_global RMIIMAGE
 	status "Ready"
+	rm -rf ${BASEDIR}/tmp/nag
 	. ${BASEDIR}/bin/zfs-status.sh
