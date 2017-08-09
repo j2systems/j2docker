@@ -314,13 +314,14 @@ hosts_add_nginx() {
 	fi
 	if [[ -f $TMPPATH/j2nginxlb.conf ]]
 	then
-		while read ADDHOST
+		while read THISHOST other
+		ADDHOST=$(echo $THISHOST|cot -d ":" -f1)
 		do
 			if [[ "$1" == "WINDOWS" && "$THISIP" != "" ]]
 			then
 				echo "..\..\bin\amend_hosts.cmd ADD $THISIP $ADDHOST $HOSTNAME" >> $ROOTPATH/tmp/windowshost
 			fi
-		done < <(grep "server_name" $TMPPATH/j2nginxlb.conf|tr -s " "|cut -d " " -f2|tr -d ";")
+		done < $TMPPATH/nginxlb.conf
 	fi
 	unset TMPPATH
 

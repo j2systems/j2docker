@@ -82,8 +82,20 @@ then
 	done
 else
 	#nothing is up so puge hosts
-	while read HOST USERNAME TYPE INTEGRATE STUDIO ATELIER
+
+	delete_global MCS
+	while  read HOST USERNAME TYPE INTEGRATE STUDIO ATELIER
 	do
+		append_global MCS $HOST
+	done < $SCRIPTBASE/tmp/management_clients
+	. $SCRIPTBASE/tmp/globals
+	for HOST in $(echo $MCS)
+	do
+		INTEGRATE=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f4)
+		USERNAME=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f2)
+		TYPE=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f3)
+		STUDIO=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f5)
+		ATELIER=$(grep "$HOST " $SCRIPTBASE/tmp/management_clients|cut -d " " -f6)
 		if [[ "$INTEGRATE" == "true" ]]
 		then
 			if [[ "$(client_status $HOST)" == "online" ]]
