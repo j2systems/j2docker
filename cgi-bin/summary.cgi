@@ -33,7 +33,6 @@ done < tmp/dockerhub
 echo "<tr><td class=\"p light\" colspan=\"3\">Containers</td></tr>"
 echo "<tr></tr>"
 echo "<tr><td class=\"label label2 yellow\">Name</td><td class=\"label label2 yellow\">Repository</td><td class=\"label label2 yellow\">Status</td></tr>"
-
 while read NAME IMAGE STATUS
 do
 	echo "<tr><td class=\"label label2\">$NAME</td><td class=\"label label2\">$IMAGE</td><td class=\"label label2\">"$STATUS"</td></tr>"
