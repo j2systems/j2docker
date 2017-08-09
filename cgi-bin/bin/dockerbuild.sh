@@ -49,9 +49,9 @@ cd $BASEDIR
 	echo "Process complete"
 	echo "SCRIPT END"
 	# Stop instance
-#	delete_global BUILDNAME
-#	delete_global BUILDFILE
-#	delete_global BUILDPATH
-
+	delete_global BUILDNAME
+	delete_global BUILDFILE
+	delete_global BUILDPATH
+	. ${BASEDIR}/bin/zfs-status.sh
 	cd $HERE
 	

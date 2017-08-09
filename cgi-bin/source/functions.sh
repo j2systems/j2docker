@@ -221,7 +221,7 @@ append_global(){
 		then
 			echo "$1=$2" >> $GLOBALS	
 		else
-			if [[ $(echo +$(grep -e "^$1=" $GLOBALS|cut -d "=" -f2)+|grep -c "+$2+") -eq 0 ]]
+			if [[ $(echo +$(grep -e "^$1=" $GLOBALS|cut -d "=" -f2)+|tr " " "+"|grep -c "+$2+") -eq 0 ]]
 			then
 				. /var/www/cgi-bin/tmp/globals
 				new="$(eval echo \$$1) $2"

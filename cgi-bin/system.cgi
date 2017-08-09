@@ -6,8 +6,6 @@ source source/functions.sh
 cat base/header 
 cat base/nav|sed "s/screen4/green/g"
 cat base/advanced|sed "s/green build/yellow build/g"
-echo "zfs-status.sh" > tmp/trigger
-
 if [[ "$REQUEST_METHOD" == "POST" ]]
 then
 	read INFO
@@ -112,5 +110,7 @@ echo "<table align=\"center\">"
 echo "<tr><td><form action=\"./terminal.cgi\" method=\"POST\"><input type=\"submit\" name=\"TERMINAL\" value=\"Terminal\" class=\"button green\"></td></tr>"
 echo "</table>"
 echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"yellow build\"></td></tr></table>"
-
 cat base/footer
+echo "zfs-status.sh" > tmp/trigger
+
+

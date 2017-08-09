@@ -16,4 +16,4 @@ cd $BASEDIR
 	JOBSTATUS="complete"
 	write_global JOBSTATUS
 	delete_global RMCONTAINER
-
+	. ${BASEDIR}/bin/zfs-status.sh

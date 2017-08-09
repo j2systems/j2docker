@@ -14,7 +14,7 @@ cd $BASEDIR
 	echo "docker import $IMPORTPATH/$IMPORTFILE j2docker:$IMPORTNAME" |bin/terminalecho.sh
 	docker import $IMPORTPATH/$IMPORTFILE j2docker:$IMPORTNAME 2>&1 |bin/terminalecho.sh
 	echo "SCRIPT END"
-	echo "SCRIPT END"
+	. ${BASEDIR}/bin/zfs-status.sh
 	delete_global TERMTARGET
 	delete_global IMPORTFILE
 	delete_global IMPORTPATH

@@ -19,3 +19,4 @@ cd $BASEDIR
 	delete_global PULLIMAGE
 	echo "SCRIPT END"
 	status "ready"
+	. ${BASEDIR}/bin/zfs-status.sh

@@ -17,5 +17,5 @@ cd $BASEDIR
 	echo "SCRIPT END"
 	delete_global TERMTARGET
 	delete_global RMIIMAGE
-	echo "SCRIPT END"
 	status "Ready"
+	. ${BASEDIR}/bin/zfs-status.sh

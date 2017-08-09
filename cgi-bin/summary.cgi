@@ -2,8 +2,6 @@
 [[ ! -f tmp/run ]] && touch tmp/run
 [[ ! -f /tmp/management_hosts ]] && touch tmp/management_hosts
 source source/functions.sh
-
-echo "dockerhub.sh" > tmp/trigger
 ADDHOST=false
 cat base/header 
 . source/client.sh 2>&1
@@ -44,3 +42,4 @@ done < <(docker ps -a --format "{{.Names}} ({{.Image}}) {{.Status}}")
 echo "<tr></tr>"
 echo "</table>"
 cat base/footer
+echo "dockerhub.sh" > tmp/trigger
