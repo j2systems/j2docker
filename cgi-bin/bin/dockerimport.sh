@@ -10,9 +10,9 @@ cd $BASEDIR
 #	Import
 	# open_terminal
 	[[ "$IMPORTNAME" == "" ]] && IMPORTNAME="new"
-	echo "Starting import of $IMPORTFILE as $IMPORTNAME"|bin/terminalecho.sh
-	echo "docker import $IMPORTPATH/$IMPORTFILE j2docker:$IMPORTNAME" |bin/terminalecho.sh
-	docker import $IMPORTPATH/$IMPORTFILE j2docker:$IMPORTNAME 2>&1 |bin/terminalecho.sh
+	echo "Starting import of $IMPORTFILE as $IMPORTNAME"
+	echo "docker import $IMPORTPATH/$IMPORTFILE j2docker:$IMPORTNAME"
+	docker import $IMPORTPATH/$IMPORTFILE j2docker:$IMPORTNAME 2>&1
 	echo "SCRIPT END"
 	. ${BASEDIR}/bin/zfs-status.sh
 	delete_global TERMTARGET

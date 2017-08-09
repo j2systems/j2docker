@@ -6,7 +6,7 @@ cd $ROOTPATH
 source source/functions.sh
 . tmp/globals
 # open_terminal
-echo "Add integrated client."|bin/terminalecho.sh
+echo "Add integrated client."
 echo "This will add an RSA certificate to the \"authorized_keys\" file"
 echo "in the users .ssh directory on $MANHOST."
 if [[ $(sshpass -o StrictHostKeyChecking=no -p $PASSWORD ssh-copy-id $USERNAME@$MANHOST) ]] 

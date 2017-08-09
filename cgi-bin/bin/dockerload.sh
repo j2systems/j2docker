@@ -9,11 +9,9 @@ source $BASEDIR/source/functions.sh
 cd $BASEDIR
 . tmp/globals
 #	Load
-	echo -e "\n"|bin/terminalecho.sh
-
-	echo "Starting load of $LOADFILE"|bin/terminalecho.sh
-	echo "docker load -i $LOADPATH/$LOADFILE" |bin/terminalecho.sh
-	docker load -i $LOADPATH/$LOADFILE 2>&1 |bin/terminalecho.sh
+	echo "Starting load of $LOADFILE"
+	echo "docker load -i $LOADPATH/$LOADFILE
+	docker load -i $LOADPATH/$LOADFILE 2>&1
 	echo "SCRIPT END"
         status "Ready"
 	delete_global TERMTARGET

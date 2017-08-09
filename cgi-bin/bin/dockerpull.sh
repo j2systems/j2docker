@@ -11,9 +11,9 @@ cd $BASEDIR
 #	Pull Image
 	# open_terminal
 	status "Pulling $PULLIMAGE"
-	echo "Starting pull of $PULLIMAGE"|bin/terminalecho.sh
-	echo "docker pull $PULLIMAGE"|bin/terminalecho.sh
-	docker pull $PULLIMAGE 2>&1|bin/terminalecho.sh
+	echo "Starting pull of $PULLIMAGE"
+	echo "docker pull $PULLIMAGE"
+	docker pull $PULLIMAGE 2>&1
 	echo "SCRIPT END"
 	delete_global TERMTARGET
 	delete_global PULLIMAGE

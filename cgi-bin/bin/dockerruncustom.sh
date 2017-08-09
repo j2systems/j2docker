@@ -31,7 +31,7 @@ then
 	. tmp/globals
 	#add new hostname to global 
 	status "Spinning up $HOST"
-	echo "Spinning up $HOST"|bin/terminalecho.sh
+	echo "Spinning up $HOST"
 	. tmp/globals
 	echo "Entrypoint: ${ENTRYPOINT}"
 	if [[ "$ENTRYPOINT" == "" || "$ENTRYPOINT" == "null" ]]
