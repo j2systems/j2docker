@@ -6,6 +6,7 @@ source /var/www/cgi-bin/source/functions.sh
 unset PORTS
 
 #Make sure all default ports always present 
+delete_global DEFAULTPORTS
 for THISPORT in 22 23 80 1972 3389 4201 4202 8080 57772
 do
 	append_global DEFAULTPORTS $THISPORT
