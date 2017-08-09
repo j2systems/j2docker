@@ -1,6 +1,4 @@
 #!/bin/bash
-[[ ! -f tmp/run ]] && touch tmp/run
-[[ ! -f /tmp/management_hosts ]] && touch tmp/management_hosts
 source source/functions.sh
 . source/client.sh
 ADDHOST=false

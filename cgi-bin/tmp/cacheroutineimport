@@ -1,0 +1,59 @@
+
+Node: aleph, Instance: HS
+
+Username: 
+Password: 
+USER>
+
+%SYS>
+
+Load started on 08/09/2017 17:12:21
+Loading file /mnt/host/CacheExtras/WebTerminal-v4.3.1.xml as xml
+Imported class: WebTerminal.Analytics
+Imported class: WebTerminal.Autocomplete
+Imported class: WebTerminal.Common
+Imported class: WebTerminal.Core
+Imported class: WebTerminal.Engine
+Imported class: WebTerminal.ErrorDecomposer
+Imported class: WebTerminal.Handlers
+Imported class: WebTerminal.Installer
+Imported class: WebTerminal.Router
+Imported class: WebTerminal.StaticContent
+Imported class: WebTerminal.Trace
+Imported class: WebTerminal.Updater
+Compiling 12 classes, using 2 worker jobs
+Compiling class WebTerminal.Analytics
+Compiling class WebTerminal.ErrorDecomposer
+Compiling class WebTerminal.Handlers
+Compiling class WebTerminal.StaticContent
+Compiling class WebTerminal.Updater
+Compiling class WebTerminal.Common
+Compiling class WebTerminal.Autocomplete
+Compiling class WebTerminal.Core
+Compiling class WebTerminal.Trace
+Compiling class WebTerminal.Router
+Compiling class WebTerminal.Engine
+Compiling routine WebTerminal.Analytics.1
+Compiling routine WebTerminal.ErrorDecomposer.1
+Compiling routine WebTerminal.Common.1
+Compiling routine WebTerminal.StaticContent.1
+Compiling routine WebTerminal.Updater.1
+Compiling routine WebTerminal.Handlers.1
+Compiling routine WebTerminal.Core.1
+Compiling routine WebTerminal.Autocomplete.1
+Compiling routine WebTerminal.Trace.1
+Compiling routine WebTerminal.Router.1
+Compiling routine WebTerminal.Engine.1
+Compiling class WebTerminal.Installer
+Compiling routine WebTerminal.Installer.1
+Installing WebTerminal application to %SYS
+Creating WEB application "/terminal"...
+WEB application "/terminal" is created.
+Creating WEB application "/terminalsocket"...
+WEB application "/terminalsocket" is created.
+%All namespace is created.
+Mapping %WebTerminal package into all namespaces: %All SAMPLES DOCBOOK
+WebTerminal package successfully mapped into all namespaces.
+Load finished successfully.
+1
+%SYS>

@@ -1,0 +1,11 @@
+aleph (j2systems/docker:HS2016.2.1.803.1.UCM) Up 58 seconds
+extsql (j2systems/docker:postgres) Exited (0) 4 minutes ago
+george (j2systems/docker:SMTP) Exited (137) 30 minutes ago
+lesleyaswell (j2systems/docker:HS2016.2.1.803.1UCM15.0-final) Exited (137) 3 minutes ago
+lesley (j2systems/docker:HS2016.2.1.803.1UCM15.0) Exited (0) 3 minutes ago
+bob (j2systems/docker:HS2016.2.1.803.1.UCM) Exited (137) 2 minutes ago
+tesths (j2systems/docker:HS2016.2.1.803.1.UCM) Exited (137) 2 minutes ago
+testpc (j2systems/docker:HS2017.1.1.111.0.17521PC) Exited (137) 2 minutes ago
+vpn1 (j2systems/docker:VPNrdp-beta) Exited (137) About a minute ago
+nginx (j2systems/docker:nginx) Exited (137) About a minute ago
+alpha (j2systems/docker:ops-mon) Exited (137) About a minute ago

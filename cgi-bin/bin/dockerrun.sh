@@ -18,7 +18,6 @@ then
 	do
 		append_global CONTAINERS $CONTAINERNAME
 	done < tmp/containers
-	cat tmp/run > tmp/this
 	sed -i "s/&/\n/g" tmp/run
 	
 	INTEGRATE=false
@@ -69,10 +68,8 @@ then
 			done
 		fi
 	done < tmp/run
-	echo "Connectivity updating..."
-
-# remove run,etc
 	rm -f tmp/run
+	echo "Connectivity updating..."
 	while [[ -f tmp/trigger ]]
 	do
 		sleep 0.5

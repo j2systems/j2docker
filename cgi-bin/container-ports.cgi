@@ -1,6 +1,5 @@
 #!/bin/bash
-[[ ! -f tmp/run ]] && touch tmp/run
-[[ ! -f /tmp/management_clients ]] && touch tmp/management_clients
+
 source source/functions.sh
 . tmp/globals
 if [[ "$PORTS" == "" ]]
