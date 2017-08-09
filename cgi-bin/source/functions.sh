@@ -298,9 +298,11 @@ add_nginx_entry() {
 }
 hosts_add_nginx() {
 	# $1=type (Windows, Linux....)
-	TMPPATH=/var/www/cgi-bin/tmp/
+	[[ "$1" == "" ]] && return 1
+	TMPPATH=/var/www/cgi-bin/tmp
 	THISIP=$(get_container_ip nginx)
 	HOSTNAME=$(hostname)
+	#echo $TMPPATH,$THISIP,$HOSTNAME
 	if [[ -f $TMPPATH/j2nginx.conf ]]
 	then
 		for ADDHOST in $(grep "$(hostname).lan" $TMPPATH/j2nginx.conf|tr -s " "|cut -d " " -f2|tr -d ";")
@@ -312,16 +314,17 @@ hosts_add_nginx() {
 			fi
 		done
 	fi
-	if [[ -f $TMPPATH/j2nginxlb.conf ]]
+	if [[ -f $TMPPATH/nginxlb ]]
 	then
 		while read THISHOST other
-		ADDHOST=$(echo $THISHOST|cot -d ":" -f1)
 		do
+			ADDHOST=$(echo $THISHOST|cut -d ":" -f1)
+			#echo $TMPPATH/j2nginx.conf,$1,$THISIP,$ADDHOST
 			if [[ "$1" == "WINDOWS" && "$THISIP" != "" ]]
 			then
 				echo "..\..\bin\amend_hosts.cmd ADD $THISIP $ADDHOST $HOSTNAME" >> $ROOTPATH/tmp/windowshost
 			fi
-		done < $TMPPATH/nginxlb.conf
+		done < $TMPPATH/nginxlb
 	fi
 	unset TMPPATH
 
