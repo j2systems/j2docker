@@ -36,6 +36,7 @@ goto :EOF
 				)
 		)
 	)
+	if NOT EXIST newhosts echo # > newhosts
 	copy newhosts %HOSTSFILE%
 	del /f newhosts
 	echo %2 removed from hosts.
@@ -59,6 +60,7 @@ goto :EOF
 			echo %%a %%b %%c %%d %%e >> newhosts
 		) 
 	)
+	if NOT EXIST newhosts echo # > newhosts
 	copy newhosts %HOSTSFILE%
 	del /f newhosts
 	echo %2 removed from hosts.
