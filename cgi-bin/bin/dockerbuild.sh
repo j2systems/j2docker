@@ -27,7 +27,7 @@ cd $BASEDIR
 #Stage 2. install.  Need to untar kit, export local vars and cinstall
 
 	echo "Untarring $BUILDFILE.  This will take some time"
-	docker run -itd --name $BUILDNAME  --network j2docker -v $SCRIPTSDIR:/mnt/host j2systems/docker:centos6HS /bin/sh 2>&1
+	docker run -itd --name $BUILDNAME  --network j2docker -v $SCRIPTSDIR:/mnt/host j2systems/docker:centos7HS /bin/sh 2>&1
 	SUBDIR=$(echo $BUILDPATH|sed "s,$SCRIPTSDIR/,,g")
 	docker exec $BUILDNAME mkdir /tmp/build 
 	docker cp $BUILDPATH/cache.key $BUILDNAME:/tmp/cache.key
