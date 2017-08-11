@@ -33,4 +33,4 @@ echo -e "_SYSTEM\nj2andUtoo\nzn \"%SYS\" s SYSOBJ=##Class(Config.Journal).Open()
 
 ccontrol stop $ISC_PACKAGE_INSTANCENAME quietly
 rm -rf /tmp/build
-
+chown cacheusr:cacheusr /InterSystems -R
