@@ -21,8 +21,8 @@ cd $BASEDIR
 	chmod 777 $BUILDDIR/Dockerfile
 	[[ "$BUILDNAME" == "" ]] && BUILDNAME="j2docker"
 	echo "Building base Centos image."
-	docker build -t j2systems/docker:centos6HS $BUILDDIR/. 2>&1
-	echo "Created j2systems/docker:centos6HS"
+	docker build -t j2systems/docker:centos7HS $BUILDDIR/. 2>&1
+	echo "Created j2systems/docker:centos7HS"
 
 #Stage 2. install.  Need to untar kit, export local vars and cinstall
 
