@@ -14,7 +14,7 @@ export ISC_PACKAGE_CSP_CONFIGURE="Y"
 export ISC_PACKAGE_CSP_SERVERTYPE="Apache"
 export ISC_PACKAGE_CSP_APACHE_CONF="/etc/httpd/conf.d/csp.conf"
 export ISC_PACKAGE_STARTCACHE="N"
-export #not included ISC_INSTALLER_LOGFILE="/tmp/Installer.log" 
+export ISC_INSTALLER_LOGFILE="/tmp/Installer.log" 
 /usr/sbin/adduser -r cacheusr
 echo cacheusr:$PASSWORD | /usr/sbin/chpasswd
 /usr/sbin/groupadd -r cachegrp
@@ -33,4 +33,12 @@ echo -e "_SYSTEM\nj2andUtoo\nzn \"%SYS\" s SYSOBJ=##Class(Config.Journal).Open()
 
 ccontrol stop $ISC_PACKAGE_INSTANCENAME quietly
 rm -rf /tmp/build
-chown cacheusr:cacheusr /InterSystems -R
+#chown cacheusr:cacheusr /InterSystems -R
+chmod 755 /etc/init.d/healthshare 
+chkconfig --level 345 httpd on
+chkconfig --level 345 healthshare on
+chkconfig --level 345 ISCAgent on
+chkconfig --level 345 xinetd on
+sed -i "s,yes,no,g" /etc/xinetd.d/telnet
+sed -i "s,# . /etc/rc.d/init.d/functions,. /etc/rc.d/init.d/functions,g" /etc/init.d/healthshare
+rm -f /etc/localtime && ln -s /usr/share/zoneinfo/GMT /etc/localtime
