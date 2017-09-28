@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Creates list of images on docker hub
 source /var/www/cgi-bin/source/functions.sh

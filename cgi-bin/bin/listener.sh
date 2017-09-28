@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 ROOTPATH=/var/www/cgi-bin
 TRIGGER=$ROOTPATH/tmp/nag
@@ -10,7 +10,7 @@ do
 	unset DOTHIS
 	while [[ "$COMMAND" == "" ]]
 	do
-		read -t 0.5 DOTHIS
+		read -t 1 DOTHIS
  		[[ "$DOTHIS" != "" ]] && COMMAND=RUN
 		[[ -f $TRIGGER ]] && COMMAND=SCRIPT
 	done
@@ -28,33 +28,19 @@ do
 			case $ACTION in
 
 				"console")
-
-					PROCESS=something
-					while [[ "$PROCESS" != "" ]]
-					do      
-        					PROCESS=$(ps -C shellinaboxd|grep -m1 "shellinaboxd"|grep -v "grep"| sed "s/p/?/g"|cut -d "?" -f1|tr -d " ")
-						[[ "$PROCESS" != "" ]] && kill -- $PROCESS
-					done
-					if [[ "$CONTAINER" == "J2DOCKERROOT" ]]
+					kill -9 $(pgrep -o shellinaboxd)
+					if [[ "$CONTAINER" != "J2DOCKERROOT" ]]
 					then
-						shellinaboxd -t --css /usr/share/shellinabox/white-on-black.css --port 4202 -s ":docker:docker:/tmp:/bin/sh" &
-					else
-						shellinaboxd -t --css /usr/share/shellinabox/white-on-black.css --port 4202 -s ":docker:docker:/tmp:docker exec -it $CONTAINER bash" &
+						docker exec $CONTAINER bash -c "for PS in $(pgrep -t pts/0); do kill -9 ${PS};done"
+						shellinaboxd -t --port 4202 -s ":tc::/tmp:bash -c \"/sbin/docker exec -it $CONTAINER /bin/sh\"" &
 					fi
 					echo ""
-					echo "http://$(hostname):4202"
+					echo "http://${HOSTIP}:4202"
 					;;
 
 				"noconsole")
-					
-					PROCESS=something
-
-					while [[ "$PROCESS" != "" ]]
-					do      
-        					PROCESS=$(ps -C shellinaboxd|grep -m1 "shellinaboxd"|grep -v "grep"| sed "s/p/?/g"|cut -d "?" -f1|tr -d " ")
-						[[ "$PROCESS" != "" ]] && kill -- $PROCESS
-					done
-					docker exec $CONTAINER bash -c "while read uname pid other;do kill -9 \$pid;done < <(ps -ef|grep -e \"bash\$\"|tr -s \" \")"
+					kill -9 $(pgrep -o shellinaboxd)
+					docker exec $CONTAINER bash -c "for PS in $(pgrep -t pts/0); do kill -9 ${PS};done"
 					echo ""
 					echo "TERMHUP"
 					;;
@@ -106,7 +92,7 @@ do
 					done
 					echo "START=$THISIP" 
 					echo "REFRESH"
-					. $SCRIPTPATH/update-clients.sh
+					. $SCRIPTPATH/mclientupdate.sh
 				;;
 	
 				"stop")
@@ -148,6 +134,16 @@ do
 					write_global RTNCONTAINER
 					;;
 
+				"checkclient")
+					bash ${SCRIPTPATH}/mclientcheck.sh ${CONTAINER}
+					;;
+				"rejectclient")
+					echo ${CONTAINER} >> ${ROOTPATH}/system/management_clients_declined
+					echo "true"
+					;;
+				"acceptclient")
+					echo
+					;; 
 				*)
 					echo "RESEND $DOTHIS"
 					#:: Received $DOTHIS.  No handler"

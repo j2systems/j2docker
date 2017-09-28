@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Stops an images 
 
@@ -12,7 +12,7 @@ cd $BASEDIR
 	delete_global JOBSTATUS
  	echo "docker stop $STOPCONTAINER" >> tmp/joblog
 	docker stop $STOPCONTAINER 2>&1 >> tmp/joblog
-	. bin/update-clients.sh
+	. bin/mclientupdate.sh
 	JOBSTATUS="complete"
 	write_global JOBSTATUS
 	delete_global STOPCONTAINER

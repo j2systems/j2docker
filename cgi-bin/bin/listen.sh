@@ -1,25 +1,23 @@
-#!/bin/sh
+#!/bin/bash
 #
 ROOTPATH=/var/www/cgi-bin
-TRIGGER=$ROOTPATH/tmp/trigger
-SCRIPTPATH=$ROOTPATH/bin
-source $ROOTPATH/source/functions.sh
-. $ROOTPATH/bin/j2docker-init.sh
-delete_global JOBSTATUS
-
+TRIGGER=${ROOTPATH}/tmp/trigger
+SCRIPTPATH=${ROOTPATH}/bin
+source ${ROOTPATH}/source/functions.sh
+. ${SCRIPTPATH}/j2docker-init.sh
 while : 
 do
 	while :
 	do
 		unset COMMAND
-		while [[ ! -f $TRIGGER ]]
+		while [[ ! -f ${TRIGGER} ]]
 		do
 			sleep 1
 		done
 		DOTHIS=$(cat $TRIGGER)
-		. $SCRIPTPATH/$DOTHIS
-		echo $DOTHIS >> $ROOTPATH/tmp/jobtrigger
-		rm -f $TRIGGER
+		bash ${SCRIPTPATH}/${DOTHIS}
+		log "${DOTHIS}"
+		rm -f ${TRIGGER}
 	done
 done
 

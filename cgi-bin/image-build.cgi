@@ -5,8 +5,7 @@ cat base/nav|sed "s/green build/yellow/g"
 source source/functions.sh 2>&1
 source source/filelist.sh 2>&1
 . tmp/globals
-THISROOT=$SCRIPTSDIR/$OUTDIR
-#echo "Thisroot $THISROOT,$SCRIPTSDIR"
+THISROOT=$SCRIPTSDIR
 case "${REQUEST_METHOD}" in
 	"POST")
 		read INSTRUCTION

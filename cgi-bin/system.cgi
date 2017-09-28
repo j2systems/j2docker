@@ -1,5 +1,4 @@
 #!/bin/bash
-[[ ! -f /tmp/management_clients ]] && touch tmp/management_clients
 source source/functions.sh
 . tmp/globals
 cat base/header 
@@ -8,12 +7,39 @@ cat base/advanced|sed "s/green build/yellow build/g"
 if [[ "$REQUEST_METHOD" == "POST" ]]
 then
 	read INFO
-#	echo $INFO
-	. bin/manage-client-array.sh $INFO > /dev/null
-	if [[ "$ADDUSER" != "" ]] 
+	THISHOST=$(echo ${INFO}|cut -d "&" -f1|cut -d "=" -f2)
+	THISCHANGE=$(echo ${INFO}|cut -d "&" -f2|cut -d "=" -f1)
+	THISVALUE=$(echo ${INFO}|cut -d "&" -f2|cut -d "=" -f2)
+	CURRENTENTRY=$(cat system/management_clients|grep -e "^${THISHOST}")
+	if [[ "${CURRENTENTRY}" != "" ]]
 	then
-		delete_global $ADDUSER
-		echo "<meta http-equiv="refresh" content=\"1;./add-host.cgi\">"
+		case ${THISCHANGE} in
+			"Delete")
+				sed -i "/${THISHOST}/d" system/management_clients
+				;;
+			*)
+				THISUSER=$(echo ${CURRENTENTRY}|cut -d " " -f2)
+				THISTYPE=$(echo ${CURRENTENTRY}|cut -d " " -f3)
+				THISINTEGRATE=$(echo ${CURRENTENTRY}|cut -d " " -f4)
+				THISSTUDIO=$(echo ${CURRENTENTRY}|cut -d " " -f5)
+				THISATELIER=$(echo ${CURRENTENTRY}|cut -d " " -f6)
+				[[ ${THISVALUE} == "true" ]] && NEWVALUE="false"||NEWVALUE="true"
+				sed -i "/${THISHOST}/d" system/management_clients
+				case ${THISCHANGE} in
+				"INTEGRATED")
+					[[ "${NEWVALUE}" == "false" ]] && THISSTUDIO="false" && THISATELIER="false"
+					echo ${THISHOST} ${THISUSER} ${THISTYPE} ${NEWVALUE} ${THISSTUDIO} ${THISATELIER} >> system/management_clients
+					;;
+				"STUDIO")
+					echo ${THISHOST} ${THISUSER} ${THISTYPE} ${THISINTEGRATE} ${NEWVALUE} ${THISATELIER} >> system/management_clients
+					;;
+				"ATELIER")
+					echo ${THISHOST} ${THISUSER} ${THISTYPE} ${THISINTEGRATE} ${THISSTUDIO} ${NEWVALUE} >> system/management_clients
+					;;
+				esac
+				sort system/management_clients -o system/management_clients
+				;;
+		esac
 	fi
 fi
 #Advanced
@@ -28,7 +54,7 @@ echo "<tr class=\"filelisting $THISCOLOR\">"
 echo "<td>$FS</td><td>$SIZE</td><td>$USED</td><td>$AVAIL</td><td>$USE</td><td>$MOUNT</td>"
 echo "</tr>"
 [[ "$THISCOLOR" == "blue" ]] && THISCOLOR=light
-done < <(df)
+done < <(df|grep -v loop)
 echo "</table>"
 echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"build\"></td></tr></table>"
 
@@ -56,7 +82,6 @@ echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"build\
 THISCOLOR=blue
 echo "<table align=\"center\">"
 echo "<tr><td class=\"information\" colspan=\"5\">ZFS Status</td></tr>"
-#echo "<tr class=\"information blue\"><td>HOST</td><td>USERNAME</td><td>OS</td><td>INTEGRATED</td><td>STUDIO</td><td>ATELIER</td></tr>"
 
 while read NAME SIZE ALLOC FREE EXPANDSZ FRAG CAP DEDUP HEALTH ALTROOT
 do
@@ -101,7 +126,7 @@ do
 	echo "<td><input type=\"submit\" name=\"ATELIER\" value=\"$ATELIER\" class=\"button information $THEME\" $DIS></td>"
 	echo "<td><input type=\"submit\" name=\"DELETE\" value=\"Delete\" class=\"button red\"></td>"
 	echo "</form></tr>"
-done < tmp/management_clients
+done < ${SYSTEMPATH}/management_clients
 echo "</table>"
 echo "<table width=\"100%\"><tr><td width=\"100%\" height=\"3px\" class=\"blue build\"></td></tr></table>"
 

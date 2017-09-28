@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 #while read TYPE RULE;do iptables -D $RULE;done < <(iptables -S|grep $PORT)
 #
@@ -26,8 +26,10 @@ fi
 # Read current PORTS and add to public and DOCKER firewall rules if required.
 . /var/www/cgi-bin/tmp/globals
 
-for CHAIN in IN_public_allow DOCKER
+for CHAIN in DOCKER IN_public_allow
 do
+	#Allow ping
+	iptables -A ${CHAIN} -p icmp -s 0/0 -m state --state NEW,ESTABLISHED,RELATED -j ACCEPT
 	for PORT in $PORTS
 	do
 		if [[ $(iptables -n -L $CHAIN|grep -c $PORT) -eq 0 ]]
@@ -52,7 +54,6 @@ do
 	done
 	if [[ "$MATCH" == "false" ]]
 	then
-		iptables -D IN_public_allow -p tcp --dport $PORT -j ACCEPT
 		iptables -D DOCKER -p tcp --dport $PORT -j ACCEPT
 	fi
 done

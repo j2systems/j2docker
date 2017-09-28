@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #Checks docker internal network and sets it to maintain uniqueness to local environment.
 
 BASEDIR=/var/www/cgi-bin/
@@ -8,13 +8,12 @@ DOCKNET=j2docker
 HOST=j2-iscinternal
 ID=j2
 HOSTNIC=$(netstat -r|grep default|tr -s " "|cut -d " " -f8)
-HOSTIP=$(ifconfig ${HOSTNIC}|grep "inet "|tr -s " "|cut -d " " -f3)
+HOSTIP=$(ifconfig ${HOSTNIC}|grep -m1 "inet "|tr -s " "|cut -d " " -f3|cut -d ":" -f2)
 while [[ "$HOSTIP" == "" ]]
 do 
-	HOSTIP=$(ifconfig ${HOSTNIC}|grep "inet "|tr -s " "|cut -d " " -f3)
+	HOSTIP=$(ifconfig ${HOSTNIC}|grep -m1 "inet "|tr -s " "|cut -d " " -f3|cut -d ":" -f2)
 	sleep 1
 done
-
 write_global HOSTIP
 HOSTOCT=$(echo $HOSTIP|cut -d "." -f4)
 write_global HOSTOCT
@@ -53,7 +52,7 @@ then
 		docker network connect $DOCKNET $CONTAINER
 	done
 	#Update hosts and routing
-	. $BASEDIR/bin/update-clients.sh
+	. $BASEDIR/bin/mclientupdate.sh
 	delete_global CONTAINERMV
 	delete_global OLDJ2DOCKERSN
 fi

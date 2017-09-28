@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #gets, sets, removes hosts entries for managment hosts
 
 add_container(){

@@ -10,8 +10,6 @@ Content-type: text/html
 <table class="headertable">
 	<tr>
 		<td class="blue"><img src="/images/j2docker-left.png" alt="J2 Logo" class="imgheader"></td>
-		<td class="imgheadermid yellow"><img src="/images/j2docker-mid.png" alt="Header spacer" class="imgheader imgheadermid"></td>
-		<td class="blue"><img src="/images/j2docker-right.png" alt="J2 DockerLogo" class="imgheader"></td>
 	</tr>
 </table>
 

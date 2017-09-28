@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Updates docker nginx reverse proxy
 # add containers to j2nginx.conf
@@ -53,5 +53,5 @@ docker cp ${THISPATH}/tmp/j2nginxlb.conf nginx:/etc/nginx/conf.d/j2nginxlb.conf
 docker exec -t nginx sh -c "service nginx stop"
 docker exec -t nginx nginx &
 docker exec -t nginx sh -c "service nginx reload"
-. ${THISPATH}/bin/update-clients.sh
+. ${THISPATH}/bin/mclientupdate.sh
 

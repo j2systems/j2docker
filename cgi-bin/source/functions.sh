@@ -1,87 +1,376 @@
-#!/bin/sh
+#!/bin/bash
 
 ROOTPATH=/var/www/cgi-bin
 GLOBALS=/var/www/cgi-bin/tmp/globals
 [[ ! -f $GLOBALS ]] && touch $GLOBALS && chmod 777 $GLOBALS
 	
+################################################################################
+#
+# Functions:
+# 	to manage:
+# 		hosts, routing, studio, atelier
+#
+#	informational:
+#		Container IP address, 
+# Note.  
+#
+# An "mc" is a management client, i.e. a host that is using the web portal 
+# and has been configured for interaction by transfer of an rsa pub key.
+#
+################################################################################                                 
 
-#gets, sets, removes hosts entries for managment hosts
+################################################################################
+#
+# 1. mc management
+#
+# function called as mcmanage <mcname> <what> <do> <details....>
+#
+# e.g.
+# mcmanage my-machine hosts add my_container 192.168.5.6 
+# will add a hosts entry of 
+# 192.168.5.6 my_container #thisserver#
+# to 
+# my-machine
+#
+# 1.1 hosts management
+#
+# *nix derivatives use standard /etc/hosts.  
+# Windows has been provided a script as the \ paths become very confusing due
+# to the way these are parsed.
+#
+# A hosts entry will be:
+# "<ipaddress> {tab} <name> {tab} #<this server hostname>#"
+#
+# The #<this server hostname># is used to purge entries.
+# 
+# A hosts entry of 
+# "<server ip> {tab} <server hostname> {tab} #<server hostname>-admin#"
+# will also be added so that the mc can communicate to this server by name.
+# This is due to potential lack of DNS services as well as problems with 
+# Windows DNS resolution.
+# (Windows does not append a . by default, so any lightweight DNS solution will fail).
+#
+# 1.2 studio management
+#
+# Studio only runs on windows.
+#
+# 1.3 atelier management
+#
+# in progress
+#
+# 1.4 rdp management
+#
+# Only for Windows.  MAC and GNU Linux in progress. 
+#
+# 1.5 route management
+#
+# A route is added to the mc for the docker subnet.
+#
+################################################################################
 
-#HOSTS file management
 
-add_rdp(){
+mcmanage(){
+	# $1=mc,$2=context, $3=command,$4.... detail
+	local MCHOST=$1
+	local COMMAND=$2
+	local ACTION=$3
+	local MCDETAIL=$(grep -e "^${MCHOST} " /var/www/cgi-bin/system/management_clients)
+	[[ "${MCDETAIL}" == "" ]] && log "mcmanage failed to get ${MCHOST} details." && return 1
+	local USERNAME=$(echo ${MCDETAIL}|cut -d " " -f 2)
+	local MCTYPE=$(echo ${MCDETAIL}|cut -d " " -f 3)
+	log "${MCHOST} ${COMMAND} ${ACTION}, (${MCTYPE}), $4 $5 $6 $7"
+	case ${COMMAND} in
+	"hosts")
+		case ${ACTION} in
+		"add")
+			#Adds single host entry
+			HOSTNAME=$(hostname)
+			[[ "${HOSTNAME}" == "$4" ]] && HOSTNAME=${HOSTNAME}-admin 
+			case ${MCTYPE} in 
+			"WINDOWS")
+				ssh ${USERNAME}@${MCHOST} powershell /c "./j2dconfig.ps1 HOSTS ADD $4 $5 ${HOSTNAME}"		
+				;;
+			"MAC"|"LINUX")
+				if [[ $(ssh ${USERNAME}@${MCHOST} "cat /etc/hosts|grep -c -e \"\t$4\t\"") -ne 0 ]]
+				then
+					# Cannot sed -i so copy hosts, amend, copy back
+					scp ${USERNAME}@${MCHOST}:/etc/hosts /tmp >/dev/null
+					sed -i "/\t$7\t/d" /tmp/hosts
+					scp /tmp/hosts ${USERNAME}@${MCHOST}:/etc/hosts >/dev/null
+					rm /tmp/hosts
+				fi
+				ssh ${USERNAME}@${MCHOST} "echo \"$5\t$4\t#${HOSTNAME}#\" >> /etc/hosts"
+				;;
+			*)
+				log "mcmange unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+				;;
+			esac
+			;;
+		"remove")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				ssh ${USERNAME}@${MCHOST} powershell /c "./j2dconfig.ps1 HOSTS REMOVE $4"			
+				;;
+			"MAC"|"LINUX")
+				scp ${USERNAME}@${MCHOST}:/etc/hosts /tmp >/dev/null
+			        sed -i "/\t$6\t/d" /tmp/hosts
+				scp /tmp/hosts ${USERNAME}@${MCHOST}:/etc/hosts >/dev/null
+				rm /tmp/hosts
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac		
+			;;
+		"purge")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				ssh ${USERNAME}@${MCHOST} powershell /c "./j2dconfig.ps1 HOSTS PURGE ${HOSTNAME}"
+				;;
+			"MAC"|"LINUX")
+				scp ${USERNAME}@${MCHOST}:/etc/hosts /tmp >/dev/null
+				sed -i "/\t#${HOSTNAME}#$/d" /tmp/hosts
+				scp /tmp/hosts ${USERNAME}@${MCHOST}:/etc/hosts >/dev/null
+				rm /tmp/hosts
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;
+		*)
+			log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+			;;
+		esac
+		;;
+		
+	"studio")
+		case ${ACTION} in
+		"add")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				ssh ${USERNAME}@${MCHOST} powershell /c "./j2dconfig.ps1 STUDIO ADD $4 ${HOSTNAME}" 
+				;;
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;
+		"remove")
+			case $3 in 
+			"WINDOWS")
+				ssh ${USERNAME}@${MCHOST} powershell /c "./j2dconfig.ps1 STUDIO REMOVE $4"	
+				;;
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;		
+		"purge")
+			case $3 in 
+			"WINDOWS")
+				${USERNAME}@${MCHOST} powershell /c "./j2dconfig.ps1 STUDIO PURGE ${HOSTNAME}"
+				;;
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;
+		esac
+		;;
+	"atelier")
+		case ${ACTION} in
+		"add")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"			
+				;;
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;
+		"remove")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"			
+				;;
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;		
+		"purge")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+				;;
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;
+		esac
+		;;
+	"rdp")
+		case ${ACTION} in
+		"add")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				IPADDRESS=$(get_container_ip $4)
+				if [[ "${IPADDRESS}" != "" ]]
+				then
+					ssh ${USERNAME}@${MCHOST} powershell /c "./j2dconfig.ps1 RDP ADD $4 ${HOSTNAME}"
+				fi			
+				;;
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;
+		"remove")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				ssh ${USERNAME}@${MCHOST} powershell /c "./j2dconfig.ps1 RDP REMOVE $4 ${HOSTNAME}"			
+				;;
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;		
+		"purge")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				ssh ${USERNAME}@${MCHOST} powershell /c "./j2dconfig.ps1 RDP PURGE ${HOSTNAME}"
+				;;
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+				;;
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+				;;
+			esac
+			;;
+		*)
+			log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8" 
+			;;
+		esac
+		;;
 
-	# Adds rdp file to public desktop
-	# $1=username $2=host, $3=container name
-	HOSTNAME=$(hostname)
-	IPADDRESS=$(get_container_ip $3)
-	if [[ "$IPADDRESS" != "" ]]
+	"route")
+		DOCKERSUBNET=$(docker network inspect j2docker|grep Subnet|cut -d ":" -f2|cut -d "/" -f1|tr -d " \"")
+		HOSTNIC=$(netstat -r|grep default|tr -s " "|cut -d " " -f8)
+		HOSTIP=$(ifconfig ${HOSTNIC}|grep "inet "|tr -s " "|cut -d " " -f3|cut -d ":" -f2)
+		case ${ACTION} in
+		"add")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				if [[ $(ssh ${USERNAME}@${MCHOST} route print|grep -c ${DOCKERSUBNET}) -eq 0 ]]
+				then		
+					ssh ${USERNAME}@${MCHOST} route add ${DOCKERSUBNET} mask 255.255.255.0 $HOSTIP > /dev/null
+				fi
+
+				;;
+			"MAC")
+				if [[ $(ssh ${USERNAME}@${MCHOST} netstat -nr -f inet|grep -c ${DOCKERSUBNET}) -eq 0 ]]
+				then
+					log "route add ${DOCKERSUBNET}/24 ${HOSTIP}"
+					ssh ${USERNAME}@${MCHOST} "route add ${DOCKERSUBNET}/24 ${HOSTIP}" 2>&1
+				fi
+				;;
+
+			*)
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"                                                                   
+				;;
+			esac
+			;;
+		"remove")
+			case ${MCTYPE} in 
+			"WINDOWS")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"                                                                   
+				;;			
+			"MAC"|"LINUX")
+				log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+				;;
+			esac
+			;;		
+		*)
+			log "mcmanage unhandled - $1,$2,$3,$4,$5,$6,$7,$8"
+			;;
+		esac
+	esac
+}
+
+################################################################################                 
+#
+# 2. Miscellaneous environment management
+#
+################################################################################
+
+# 2.1 Add to local hosts.  Let host communicate with other hosts by name 
+
+add_host(){
+
+	# Adds mc details to hosts
+	# $1=IP $2=mc hostname
+	sed -i "/$2/d" /etc/hosts
+	echo $1 $2 >> /etc/hosts
+}
+
+
+################################################################################                                 
+#
+# 3. Informational
+#
+################################################################################
+
+# 3.1 returns online\offline
+
+client_status() {
+	# $1 =mc
+	unset PINGCOUNT
+	if [[ "$(get_dns_entry $1)" != "" ]]
 	then
-		echo "..\..\bin\amend_rdp.cmd ADD $3 $HOSTNAME" >> $ROOTPATH/tmp/windowshost
+		# Give 2 pings in case first ping invokes ARP request
+		PINGCOUNT=$(ping -c 2 -w 1 $1 |grep -c "ttl")
+		if [[ $PINGCOUNT -eq 0 ]]
+		then
+			echo "offline"
+		else
+			echo "online"
+		fi
+	else
+		echo "offline"
 	fi
 }
-remove_rdp(){
-	# Removes rdp file from public desktop
-	# $1=username, $2=host, $3=container name
-	HOSTNAME=$(hostname)
-	echo "..\..\bin\amend_rdp.cmd DELETE $3 $HOSTNAME" >> $ROOTPATH/tmp/windowshost
-}
-purge_rdp(){
-	# Purges rdp files from public desktop
-	# $1=username, $2=host
-	ssh -n $1@$2 "/bin/amend_rdp.cmd PURGE $(hostname)" >/dev/null
 
-}
+# 3.2 IMAGE information
 
-add_container(){
-
-	# Adds container details to hosts
-	# $1=username $2=host, $3=container name
-	HOSTNAME=$(hostname)
-	IPADDRESS=$(get_container_ip $3)
-	if [[ "$IPADDRESS" != "" ]]
-	then
-		echo "..\..\bin\amend_hosts.cmd ADD $IPADDRESS $3 $HOSTNAME" >> $ROOTPATH/tmp/windowshost
-	fi
-}
-remove_container(){
-	# Removes container from hosts
-	# $1=username, $2=host, $3=container name
-	echo "..\..\bin\amend_hosts.cmd DELETE $3" >> $ROOTPATH/tmp/windowshost
-}
-
-get_hosts_linux(){
-	[[ -f /var/www/cgi-bin/tmp/hosts ]] && rm -f /var/www/cgi-bin/tmp/hosts
-	scp $1@$2:/etc/hosts /var/www/cgi-bin/tmp/hosts
-}
-
-
-put_hosts_linux(){
-	scp /var/www/cgi-bin/tmp/hosts $1@$2:/etc/hosts
-	rm -rf tmp/hosts
-}
-
-add_container_linux(){
-	
-	HOSTUPDATE=/var/www/cgi-bin/tmp/hosts
-	HOSTNAME=$(hostname)
-        IPADDRESS=$(get_container_ip $1)
-	if [[ $(grep -c "$1" $HOSTUPDATE) -ne 0 ]]
-	then
-		sed -i "/\t$1\t/d" $HOSTUPDATE
-	fi	
-	echo -e "${IPADDRESS}\t$1\t#${HOSTNAME}#" >> $HOSTUPDATE
-
-}
-
-delete_container_linux(){
-
-	#$1-username, $2=host, $3=container
-	[[ -f tmp/hosts ]] && rm -f tmp/hosts
-	ssh -n $1@$2 "cat /etc/hosts" > tmp/hosts
-	sed -i "/\t$3\t/d" tmp/hosts	
-	cat tmp/hosts|ssh -n $1@$2 "cat > /etc/hosts"
-}
+# 3.2.1 Container IP
 
 get_container_ip(){
 	# Get container IP address
@@ -89,187 +378,128 @@ get_container_ip(){
 	echo $(docker inspect $1|grep -A100 "Networks"|grep IPAddress|grep 172|cut -d ":" -f2|tr -d '," ')
 }
 
-configure_routing(){
-	DOCKERSUBNET=$(docker network inspect j2docker|grep Subnet|cut -d ":" -f2|cut -d "/" -f1|tr -d " \"")
-	HOSTNIC=$(netstat -r|grep default|tr -s " "|cut -d " " -f8)
-	HOSTIP=$(ifconfig ${HOSTNIC}|grep "inet "|tr -s " "|cut -d " " -f3)
-	if [[ "$3" == "WINDOWS" ]]
-	then
-		if [[ $(ssh $1@$2 route print|grep -c $DOCKERSUBNET) -eq 0 ]]
-		then		
-			ssh $1@$2 route add $DOCKERSUBNET mask 255.255.0.0 $HOSTIP > /dev/null
-		fi
-	else
-		if [[ $(ssh $1@$2 /usr/sbin/route|grep -c $DOCKERSUBNET) -eq 0 ]]
-		then
-			ssh $1@$2 "sudo /usr/sbin/route add -net $DOCKERSUBNET netmask 255.255.0.0 gw $HOSTIP" 2>&1
-		fi
-	fi
-}
+# 3.2.2 ENTRYPOINT information
 
-purge_hosts(){
-	 # $1=username, $2=host hostname
-	echo "..\..\bin\amend_hosts.cmd PURGE $(hostname)" >> $ROOTPATH/tmp/windowshost
-}
-
-purge_hosts_linux(){
-	HOSTUPDATE=/var/www/cgi-bin/tmp/hosts
-	 # $1=username, $2=host
-	HOSTNAME=$(hostname)
-	get_hosts_linux $1 $2
-	sed -i "/#${HOSTNAME}#/d" $HOSTUPDATE
-	put_hosts_linux $1 $2
-}
-
-update_managementhosts(){
-	# $1=action, $2=container
-	DATAPATH=/var/www/cgi-bin/
-	source $DATAPATH/source/manage_registry.sh
-	while read HOST USERNAME TYPE INTEGRATE STUDIO ATELIER
-	do
-		if [[ "$INTEGRATE" == "true" ]]
-		then
-			if [[ "$1" == "amend" ]]
-			then
-				add_container $USERNAME $HOST $2
-			else
-				remove_container $USERNAME $HOST $2
-			fi
-			if [[ "$TYPE" == "WINDOWS" && "$INTEGRATE" == "true" ]]
-			then
-				if [[ "$1" == "delete" ]]
-                		then
-					remove_registry $USERNAME $HOST $2
-				fi
-			fi
-		fi
-	done < $DATAPATH/tmp/management_clients
-}
-
-# REGISTRY MANAGEMENT
-
-add_registry(){
-
-	#$1=username $2=management host $3=container name
-	echo "..\..\bin\amend_registry.cmd ADD $3 $(hostname)" >> $ROOTPATH/tmp/windowshost
-}
-
-remove_registry(){
-	#$1=username $2=management host $3=container name
-	echo  "..\..\bin\amend_registry.cmd REMOVE $3" >> $ROOTPATH/tmp/windowshost
-}
-
-purge_registry(){
-
-	#$1=username $2=management host 
-	ssh -n $1@$2 "/bin/amend_registry.cmd PURGE $(hostname)" >/dev/null
-}
-# IMAGE information
+# 3.2.2.1 Is it Healthshare?
 
 isHS(){
-# Using entrypoint set as /sbin/pseud-init to determine
-# %1=container name
+	# Using entrypoint set as /sbin/pseud-init to determine
+	# $1=container name
 
-local ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $1|tr -d "[]\"")
-if [[ "$ENTRYPOINT" == "/sbin/pseudo-init" ]] 
-then
-	echo "true"
-else
-	echo "false"
-fi
+	local ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $1|tr -d "[]\"")
+	if [[ "$ENTRYPOINT" == "/sbin/pseudo-init" ]] 
+	then
+		echo "true"
+	else
+		echo "false"
+	fi
 }
+
+# 3.2.2.1 Is it RDP?
 
 isRDP(){
-# Using entrypoint set as /sbin/pseud-init to determine
-# %1=container name
+	# Using entrypoint set as /sbin/rdp to determine
+	# $1=container name
 
-local ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $1|tr -d "[]\"")
-if [[ "$ENTRYPOINT" == "/sbin/rdp" ]]
-then
-        echo "true"
-else
-        echo "false"
-fi
-}
-
-
-
-write_global(){
-#writes fresh global
-	if [[ $(grep -c -e "^$1=" $GLOBALS) -eq 0 ]]
+	local ENTRYPOINT=$(docker inspect --format='{{json .Config.Entrypoint}}' $1|tr -d "[]\"")
+	if [[ "$ENTRYPOINT" == "/sbin/rdp" ]]
 	then
-		echo "$1=$(eval echo \$$1)" >> $GLOBALS
+        	echo "true"
 	else
-		if [[ "$(grep -e "^$1=$(eval echo \$$1)" $GLOBALS)" != "$1=$(eval echo \$$1)" ]]
-		then
-			sed -i "s,$1=.*,$1=$(eval echo \$$1),g" $GLOBALS
-		fi
+        	echo "false"
 	fi
 }
 
-delete_global(){
-#deletes whole global
-	[[ "$1" != "" ]] && sed -i "/^$1=/d" $GLOBALS
+################################################################################
+#
+# 4. Globals
+# 
+# Variables that are required in all components, i.e. web and scripts
+# Most scripts (.sh and .cgi) run ". /var/www/cgi-bin/tmp/globals" to get
+# up-to-date environment settings.
+#
+# These functions allow quick setting and modification within scripts.
+#
+################################################################################
+
+write_global(){                                                                                                                                   
+#writes fresh global                                                                                                                              
+        if [[ $(grep -c -e "^$1=" $GLOBALS) -eq 0 ]]                                                                                              
+        then                                                                                                                                      
+                echo "$1=$(eval echo \$$1)" >> $GLOBALS                                                                                           
+        else                                                                                                                                      
+                if [[ "$(grep -e "^$1=$(eval echo \$$1)" $GLOBALS)" != "$1=$(eval echo \$$1)" ]]                                                  
+                then                                                                                                                              
+                        sed -i "s,$1=.*,$1=$(eval echo \$$1),g" $GLOBALS                                                                          
+                fi                                                                                                                                
+        fi                                                                                                                                        
+}   
+
+delete_global(){                                                                                                                                  
+#deletes whole global                                                                                                                             
+        [[ "$1" != "" ]] && sed -i "/^$1=/d" $GLOBALS                                                                                             
+}                                                                                                                                                 
+                                                                                                                                                  
+append_global(){                                                                                                                                  
+#appends to global                                                                                                                                
+        local new                                                                                                                                 
+        if [[ "$1" != "" ]] && [[ "$2" != "" ]]                                                                                                   
+        then                                                                                                                                      
+                if  [[ $(grep -c -e "^$1=" $GLOBALS) -eq 0 ]]                                                                                     
+                then                                                                                                                              
+                        echo "$1=$2" >> $GLOBALS                                                                                                  
+                else                                                                                                                              
+                        if [[ $(echo +$(grep -e "^$1=" $GLOBALS|cut -d "=" -f2)+|tr " " "+"|grep -c "+$2+") -eq 0 ]]                              
+                        then                                                                                                                      
+                                . /var/www/cgi-bin/tmp/globals                                                                                    
+                                new="$(eval echo \$$1) $2"                                                                                        
+                                delete_global $1                                                                                                  
+                                echo -e "$1=\"$new\"" >> $GLOBALS                                                                                 
+                        fi                                                                                                                        
+                fi                                                                                                                                
+        fi                                                                                                                                        
 }
 
-append_global(){
-#appends to global
-	local new
-	if [[ "$1" != "" ]] && [[ "$2" != "" ]]
-	then
-		if  [[ $(grep -c -e "^$1=" $GLOBALS) -eq 0 ]] 
-		then
-			echo "$1=$2" >> $GLOBALS	
-		else
-			if [[ $(echo +$(grep -e "^$1=" $GLOBALS|cut -d "=" -f2)+|tr " " "+"|grep -c "+$2+") -eq 0 ]]
-			then
-				. /var/www/cgi-bin/tmp/globals
-				new="$(eval echo \$$1) $2"
-				delete_global $1
-				echo -e "$1=\"$new\"" >> $GLOBALS
-			fi
-		fi
-	fi
+remove_entry_global(){                                                                                                                            
+#removes entry from global                                                                                                                        
+        if [[ "$1" != "" ]] && [[ "$2" != "" ]]                                                                                                   
+        then                                                                                                                                      
+                local REMOVE                                                                                                                      
+                REMOVE=$(echo "+$(grep -e "^$1=" $GLOBALS|cut -d "=" -f2)+"|tr -d "\""|tr " " "+"|sed "s/+$2+/+/"|tr "+" " "|sed "s/^\ //"|sed "s/\ $//")
+                delete_global $1                                                                                                                  
+                if [[ "$REMOVE" != "" ]]                                                                                                          
+                then                                                                                                                              
+                        if [[ $(echo $REMOVE|grep -c " ") -eq 0 ]]                                                                                
+                        then                                                                                                                      
+                                echo "$1=$REMOVE">>$GLOBALS                                                                                       
+                        else                                                                                                                      
+                                echo -e "$1=\"$REMOVE\"" >>$GLOBALS                                                                               
+                        fi                                                                                                                        
+                fi                                                                                                                                
+        fi                                                                                                                                        
 }
 
-remove_entry_global(){
-#removes entry from global
-	if [[ "$1" != "" ]] && [[ "$2" != "" ]]
-	then
-		local REMOVE
-		REMOVE=$(echo "+$(grep -e "^$1=" $GLOBALS|cut -d "=" -f2)+"|tr -d "\""|tr " " "+"|sed "s/+$2+/+/"|tr "+" " "|sed "s/^\ //"|sed "s/\ $//")
-		delete_global $1
-		if [[ "$REMOVE" != "" ]]
-		then
-			if [[ $(echo $REMOVE|grep -c " ") -eq 0 ]]
-			then
-				echo "$1=$REMOVE">>$GLOBALS
-			else 
-				echo -e "$1=\"$REMOVE\"" >>$GLOBALS
-			fi
-		fi
-	fi
+
+
+
+get_dns_entry(){
+	#$1 = lookup value
+	#returns <IP> <hostname> is found
+	nslookup $1 2>&1|grep -A1 -e "^Name:\ *$1$"|grep "Address 1"|cut -d " " -f3-
 }
+################################################################################                                 
+#
+
+
+
+################################################################################
+
 
 status() {
 #writes a status message for system page
 	echo $1 > tmp/status
 
 }
-
-client_status() {
-
-	unset PINGCOUNT
-	PINGCOUNT=$(ping -c 2 -i 0.3 $1 |grep -c "ttl")
-	if [[ $PINGCOUNT -eq 0 ]]
-	then
-		echo "offline"
-	else
-		echo "online"
-	fi
-}
-
-
 ######## NGINX
 
 remove_nginx_entry() {
@@ -342,3 +572,6 @@ imagelocation() {
 	echo $(grep "$(echo $1|tr ":" " ")" /var/www/cgi-bin/tmp/images|cut -d " " -f3)
 }
 
+log(){
+	echo $(date +"%Y-%m-%d %H:%M") "$1" >> /var/log/system.log
+}

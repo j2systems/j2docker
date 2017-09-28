@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Creates table from local images vs images on docker hub
 IMAGES=tmp/images

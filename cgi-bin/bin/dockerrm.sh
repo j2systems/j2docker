@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Removes an image 
 
@@ -11,7 +11,7 @@ cd $BASEDIR
 	echo "docker rm $RMCONTAINER" >> tmp/joblog
 	docker rm $RMCONTAINER 2>&1 >> tmp/joblog
 	##[[ -f $BASEDIR/tmp/nginx ]] && sed -i "/^$RMCONTAINER /d" $BASEDIR/tmp/nginx
-	$BASEDIR/bin/update-clients.sh
+	$BASEDIR/bin/mclientupdate.sh
 	docker volume prune -f
 	JOBSTATUS="complete"
 	write_global JOBSTATUS

@@ -74,7 +74,7 @@ then
 	do
 		sleep 0.5
 	done
-	echo "update-clients.sh" > tmp/trigger
+	echo "mclientupdate.sh" > tmp/trigger
 	while [[ -f tmp/trigger ]]
 	do
 		sleep 0.5

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 export TIMEZONE=GMT
 export CACHEDIR="/InterSystems/hs"
 export PASSWORD="j2andUtoo"

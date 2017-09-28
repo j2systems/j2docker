@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #
 # Saves an image. 
 BASEDIR=/var/www/cgi-bin

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 add_registry(){
 
 	#$1=username $2=management host $3=container name

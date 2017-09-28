@@ -37,7 +37,7 @@ read DETAIL
 if [[ "$MODE" != "unknown" ]]
 then
 		echo "<table width=\"100%\"  align=\"center\">"
-		echo "<tr></tr><tr><td class=\"information\">\"$MODE\" has been instigated.</td></tr></table>"
+		echo "<tr></tr><tr><td class=\"information\">\"$MODE\" has been initiated.</td></tr></table>"
 		if [[ "$MODE" != "TERMINAL" ]]
 		then
 			cat base/websocket
@@ -60,11 +60,13 @@ case "$MODE" in
 		PASSWORD=$(echo $DETAIL|cut -d "&" -f2|cut -d "=" -f2)
 		[[ $(echo $DETAIL|grep -c "STUDIO=") -eq 1 ]] && STUDIO=true
 		[[ $(echo $DETAIL|grep -c "ATELIER=") -eq 1 ]] && ATELIER=true
+		HOSTIP=$(env|grep "REMOTE_ADDR"|cut -d "=" -f2)
 		write_global USERNAME
 		write_global PASSWORD
 		write_global STUDIO
 		write_global ATELIER
-		echo "manage-clients.sh" > tmp/nag
+		write_global HOSTIP
+		echo "mclientsetup.sh" > tmp/nag
 	;;
 
 	"BUILD")
